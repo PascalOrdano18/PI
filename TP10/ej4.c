@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include "utillist.h"
+#include <stdlib.h>
 
 TList addAll(TList lista1,  TList lista2);
 
@@ -64,24 +65,23 @@ int main(void) {
 
 
 
-void addAll(TList lista1, const TList lista2){
-  
-  if(!lista2){
+TList addAll(TList lista1, const TList lista2){
+  if(lista2 == NULL){
     return lista1;
   }
-
+  if(lista1 == NULL || lista1->elem > lista2->elem){
+    TList node = malloc(sizeof(*node));
+    node->elem = lista2->elem;
+    node->tail = addAll(lista1, lista2->tail);
+    return node;
+  }
   if(lista1->elem < lista2->elem){
-    addAll(lista1->tail, lista2);
+    lista1->tail = addAll(lista1->tail, lista2);
   }
-
-  if(lista1->elem == lista2->elem){
-    addAll(lista->tail, lista2->tail);
+  else{
+    lista1->tail = addAll(lista1->tail, lista2->tail);
   }
-
-  if(lista1->elem > lista2->tail){
-    addAll(lista1, lista2->tail);
-  }
-
+  return lista1;
 }
 
 
