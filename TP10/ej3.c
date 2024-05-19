@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include "utillist.h"
+#include <stdlib.h>
 
 // TambiÃ©n podria ser de tipo TList
 void order (TList list);
@@ -40,7 +41,26 @@ int main(void) {
 }
 
 
+void order (TList list){
 
+  if(list == NULL){
+    return ;
+  }
+
+  TList nextNode = list->tail;
+  if(nextNode == NULL){
+    return ;
+  }
+
+  if(list->elem >= nextNode->elem){
+    list->tail = nextNode->tail;
+    order(list);
+    free(nextNode);
+  }
+  else{
+    order(list->tail);
+  }
+}
 
 
 
