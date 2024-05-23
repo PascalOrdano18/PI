@@ -11,9 +11,9 @@ int main(void) {
 
   int pares[ELEMS], impares[ELEMS];
 
-  for(int i=1; i <= ELEMS; i++) {
-    pares[i-1] = i * 2 ;
-    impares[i-1] = i * 2 - 1;
+  for (int i = 1; i <= ELEMS; i++) {
+    pares[i - 1] = i * 2;
+    impares[i - 1] = i * 2 - 1;
   }
 
   TList lPar = fromArray(pares, ELEMS);
@@ -29,9 +29,9 @@ int main(void) {
   freeList(lImpar);
 
   int all[ELEMS * 2];
-  for(int i=1, j=0; i <= ELEMS; i++) {
+  for (int i = 1, j = 0; i <= ELEMS; i++) {
     all[j++] = i * 2 - 1;
-    all[j++] = i * 2 ;
+    all[j++] = i * 2;
   }
   TList lAll = fromArray(all, ELEMS * 2);
   lPar = fromArray(pares, ELEMS);
@@ -43,7 +43,7 @@ int main(void) {
   assert(checkElems(lPar, pares, ELEMS));
   freeList(lPar);
   freeList(lAll);
-  
+
   lPar = NULL;
   lImpar = fromArray(impares, ELEMS);
   TList aux = restaList(lPar, lImpar);
@@ -54,25 +54,25 @@ int main(void) {
   assert(aux == NULL);
   freeList(lImpar2);
 
-  printf ("OK!\n");
+  printf("OK!\n");
   return 0;
 }
 
 
-TList restaList(TList lista1, TList lista2){  
-    if(lista1 == NULL){
-        return lista1;
-    }
-    if(lista2 == NULL || lista1->elem < lista2->elem){
-        TList newList = malloc(sizeof(*newList));
-        newList->elem = lista1->elem;
-        newList->tail = restaList(lista1->tail, lista2);
-        return newList;
-    }
-    if(lista1->elem == lista2->elem){
-        return restaList(lista1->tail, lista2->tail);
-    }
-    return restaList(lista1, lista2->tail);
+TList restaList(TList lista1, TList lista2){
+  if (lista1 == NULL){
+    return lista1;
+  }
+  if (lista2 == NULL || lista1->elem < lista2->elem){
+    TList newList = malloc(sizeof(*newList));
+    newList->elem = lista1->elem;
+    newList->tail = restaList(lista1->tail, lista2);
+    return newList;
+  }
+  if (lista1->elem == lista2->elem){
+    return restaList(lista1->tail, lista2->tail);
+  }
+  return restaList(lista1, lista2->tail);
 }
 
 
