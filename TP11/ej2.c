@@ -4,7 +4,6 @@
 
 #define DIVISIONES 100000
 #define EPSILON 0.0000001
-#define FUNCION(x) sin((x))
 #define DISTANCIA(x, y) (y)-(x)
 #define BLOQUE 100   //podria tener 50 raices, pues por cada raiz se usan dos elementos del array
 
@@ -44,9 +43,9 @@ int main(void){
         { tan, "tan" },
         { sqrt, "sqrt"},
         { cosh, "cosh"}
-      };
-    Functions funcion = getFuncion(funciones, sizeof(funciones)/sizeof(*funciones));
-    Intervalo intervalo = {0,0};
+    };
+    Functions funcion = getFuncion(funciones, sizeof(funciones) / sizeof(*funciones));
+    Intervalo intervalo = { 0,0 };
     getIntervalo(&intervalo);
     Apariciones aparicionesResult = buscaRaices(&intervalo, funcion);
 
@@ -62,19 +61,19 @@ Apariciones buscaRaices(Intervalo* intervalo, Functions funcion){
     apariciones.dimRaices = 0;
 
     int moduloDistancia = DISTANCIA(intervalo->from, intervalo->upTo);
-    float step = (float)moduloDistancia/DIVISIONES;
+    float step = (float)moduloDistancia / DIVISIONES;
 
-    for(float i = intervalo->from; i < (intervalo->upTo - step); i += step){
+    for (float i = intervalo->from; i < (intervalo->upTo - step); i += step){
         float funcionI = funcion.funcion(i);
-        float funcionIpStep = funcion.funcion(i+step);
-        if(funcionI * funcionIpStep <= 0){  // TEOREMA DE BOLZANO
-            if(!(apariciones.dimRaices % BLOQUE)){
+        float funcionIpStep = funcion.funcion(i + step);
+        if (funcionI * funcionIpStep <= 0){  // TEOREMA DE BOLZANO
+            if (!(apariciones.dimRaices % BLOQUE)){
                 reallocateMemo(&apariciones);
             }
-        guardarRaices(&apariciones, i, step);
+            guardarRaices(&apariciones, i, step);
         }
         else if (funcionI <= EPSILON && funcionIpStep >= EPSILON){
-            if(!(apariciones.dimRaices % BLOQUE)){
+            if (!(apariciones.dimRaices % BLOQUE)){
                 reallocateMemo(&apariciones);
             }
             guardarRaices(&apariciones, i, step);
@@ -84,24 +83,24 @@ Apariciones buscaRaices(Intervalo* intervalo, Functions funcion){
 }
 void guardarRaices(Apariciones* apariciones, float i, float step){
     apariciones->vecAparecidos[apariciones->dimRaices].from = i;
-    apariciones->vecAparecidos[apariciones->dimRaices].upTo = i+step;
+    apariciones->vecAparecidos[apariciones->dimRaices].upTo = i + step;
     apariciones->dimRaices++;
 }
 
 void reallocateMemo(Apariciones* apariciones){
-    apariciones->vecAparecidos = realloc(apariciones->vecAparecidos,  (apariciones->dimRaices + BLOQUE) * sizeof(IntervaloRaiz));
+    apariciones->vecAparecidos = realloc(apariciones->vecAparecidos, (apariciones->dimRaices + BLOQUE) * sizeof(IntervaloRaiz));
 }
 
 Functions getFuncion(Functions funciones[], size_t dim){
     int choice = 0;
     do{
         puts("Seleccione la funcion a analizar:\n");
-        for(int i = 0; i < dim; i++){
-            printf("%d -> %s(x)\n", i+1, funciones[i].name);
+        for (int i = 0; i < dim; i++){
+            printf("%d -> %s(x)\n", i + 1, funciones[i].name);
         }
         scanf("%d", &choice);
-    }while(choice < 1 || choice > dim);
-    return funciones[choice-1];
+    } while (choice < 1 || choice > dim);
+    return funciones[choice - 1];
 }
 
 void getIntervalo(Intervalo* intervalo){
@@ -111,16 +110,16 @@ void getIntervalo(Intervalo* intervalo){
         printf("\nHasta: ");
         scanf("%d", &intervalo->upTo);
 
-        printf("El intervalo es [%d ; %d]", intervalo->from,intervalo->upTo);
-    } while(intervalo->from >= intervalo->upTo);
+        printf("El intervalo es [%d ; %d]", intervalo->from, intervalo->upTo);
+    } while (intervalo->from >= intervalo->upTo);
     return;
 }
 
 void printResults(Apariciones aparicionesResult){
     printf("\nRaices encontradas: %d\n", aparicionesResult.dimRaices);
 
-    for(int i = 0; i < aparicionesResult.dimRaices;i++){
+    for (int i = 0; i < aparicionesResult.dimRaices;i++){
         printf("Entre: %f\ty %f\n", aparicionesResult.vecAparecidos[i].from, aparicionesResult.vecAparecidos[i].upTo);
     }
-    return ;
+    return;
 }
