@@ -42,11 +42,10 @@ int main(void) {
 TList subList(TList list, int from, int to){
     if(from < 0 || to < from || list == NULL)
         return NULL;
-
     if(from == 0){
         TList newNode = malloc(sizeof(TNode));
         newNode->elem = list->elem;
-        newNode->tail = subList(list->tail, 0, to-1);
+        newNode->tail = subList(list->tail, from, to-1);
         return newNode;
     }
     return subList(list->tail, from-1, to-1);
