@@ -17,7 +17,7 @@ int main(void) {
     assert(insertList(myList, "hola y adios")==1);
     assert(sizeList(myList)==2);
 
-    //assert(deleteList(myList, "no estoy")==0);
+    assert(deleteList(myList, "no estoy")==0);
 
     freeList(myList);
 
