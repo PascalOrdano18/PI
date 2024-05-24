@@ -1,3 +1,5 @@
+
+
 p es un arreglo de punteros a funciones que no reciben parámetros y devuelven punteros a double.
 
 double * (*p[])(void)
