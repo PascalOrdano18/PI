@@ -16,6 +16,8 @@ struct listCDT{
     compare cmp;       // Devuelve -1 si el primer elemento es "menor" (segun como lo defina el usuario) , 0 si es "igual" y 1 si es "mayor"
 };
 
+typedef elemType (*funcP)(elemType);
+
 listADT newList(compare cmp){
     listADT lista = calloc(1, sizeof(struct listCDT));
     lista->cmp = cmp;
@@ -104,4 +106,16 @@ static List getElementAtIndexRec(const List list, int index){
 //  LO RESOLVI! TENIA QUE CREAR UN TYPEDEF EN EN ARCHIVO DE ENCABEZADO QUE FUNCIONE COMO List
 Listh getElementAtIndex(const listADT list, int index){
     return getElementAtIndexRec(list->first, index);
+}
+
+void mapRec(List list, funcP funcion){
+    if(list == NULL){
+        return ;
+    }
+    list->head = funcion(list->head);
+    mapRec(list->tail, funcion);
+}
+
+void map(listADT list, funcP funcion){
+    mapRec(list->first, funcion);
 }

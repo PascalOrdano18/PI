@@ -11,6 +11,8 @@ typedef struct node* Listh;
 
 typedef char * elemType;
 
+typedef elemType (*funcP)(elemType);
+
 // función para poder comparar dos elementos
 // retorna
 //     negativo si e1 es "menor" que e2 (e1 debe estar antes que e2)
@@ -40,7 +42,8 @@ int deleteList(listADT list, elemType elem);
 
 int sizeList(const listADT list);
 
-
 Listh getNodeAtIndex(const listADT list, int index);
+
+void map(listADT list, funcP funcion);
 
 #endif //UNTITLED6_LISTADT_H
