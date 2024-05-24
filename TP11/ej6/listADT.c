@@ -16,7 +16,6 @@ struct listCDT{
     compare cmp;       // Devuelve -1 si el primer elemento es "menor" (segun como lo defina el usuario) , 0 si es "igual" y 1 si es "mayor"
 };
 
-typedef elemType (*funcP)(elemType);
 
 listADT newList(compare cmp){
     listADT lista = calloc(1, sizeof(struct listCDT));
