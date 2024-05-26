@@ -2,11 +2,9 @@
 #include <stdlib.h>
 #include "conjuntosADT.h"
 
-
 #define BLOCK 20
-
-// Como los elementos del conjunto no estan ordenados, voy a usar un array en vez de listas.
-
+// SOLUCION USANDO ARRAYS, IMPLEMENTAR CON LISTAS PARA PRACTICAR
+//
 struct setCDT{
     Array conjunto;
     size_t size;
@@ -25,8 +23,7 @@ setADT newSet(compare func){
     return newArray;
 }
 
-
-void freeSet(setADT set){  // chequear
+void freeSet(setADT set){
     free(set->conjunto);
     free(set);
 }
@@ -34,8 +31,6 @@ void freeSet(setADT set){  // chequear
 int isEmptySet(setADT set){
     return !(set->size);
 }
-
-
 
 int addElement(setADT set, elemType elem){
     int found = setContains(set, elem);
@@ -62,13 +57,11 @@ int deleteElement(setADT set, elemType element){
     return found;
 }
 
-
 // Devuelve 1 si contiene al elemento y 0 si no lo contiene
 int setContains(const setADT set, elemType element){
     char found = 0;
     for(int i = 0; i < set->size; i++){
-        int c = set->cmp(set->conjunto[i], element);
-        if(c == 0){
+        if(!(set->cmp(set->conjunto[i], element))){
             found = 1;
         }
     }
@@ -78,7 +71,6 @@ int setContains(const setADT set, elemType element){
 int sizeSet(const setADT set){
     return set->size;
 }
-
 
 setADT unionSet(setADT set1, setADT set2){
     setADT uSet = newSet(set1->cmp);
@@ -91,9 +83,7 @@ setADT unionSet(setADT set1, setADT set2){
     for(int i = 0; i < set2->size; i ++){
         int found = 0, j = 0;
         for(j = 0; j < uSet->size; j++){
-            int c = uSet->cmp(uSet->conjunto[j], set2->conjunto[i]);
-            // Aca podria trabajar solo con el valor de c, y no meter esa auxiliar found
-            if(c == 0){
+            if(!(uSet->cmp(uSet->conjunto[j], set2->conjunto[i]))){
                 found = 1;
             }
         }
@@ -103,7 +93,6 @@ setADT unionSet(setADT set1, setADT set2){
     }
     return uSet;
 }
-
 
 setADT intersectionSet(setADT set1, setADT set2){
     setADT iSet = newSet(set1->cmp);
@@ -117,7 +106,6 @@ setADT intersectionSet(setADT set1, setADT set2){
     }
     return iSet;
 }
-
 
 setADT diffSet(setADT set1, setADT set2){
     setADT dSet = newSet(set1->cmp);
