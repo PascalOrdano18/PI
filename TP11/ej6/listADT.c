@@ -4,7 +4,7 @@
 
 
 typedef struct node{
-    elemType head;         // Como funciona esto? PREGUNTAR
+    elemType head;
     struct node* tail;
 } node;
 
@@ -82,6 +82,7 @@ int insertList(listADT list, elemType elem){
     list->size += flag;
     return flag;
 }
+
 
 
 int deleteList(listADT list, elemType elem){
