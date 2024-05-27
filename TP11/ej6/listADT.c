@@ -84,15 +84,31 @@ int insertList(listADT list, elemType elem){
 }
 
 
+static List deleteListRec(List list, elemType elem, compare cmp, int* state){
+    if(list == NULL){
+        return NULL;
+    }
+    int c = cmp(list->head, elem);
+    if(c == 0){
+        List nextNode = list->tail;
+        free(list);
+        *state = 1;
+        return nextNode;
+    }
+    list->tail = deleteListRec(list->tail, elem, cmp, state);
+    return list;
+}
+
 
 int deleteList(listADT list, elemType elem){
-    return 0;
+    int state = 0;
+    deleteListRec(list->first, elem, list->cmp, &state);
+    return state;
 }
 
 int sizeList(const listADT list){
     return list->size;
 }
-
 
 static List getElementAtIndexRec(const List list, int index){
     if(list == NULL || !index)
@@ -102,7 +118,6 @@ static List getElementAtIndexRec(const List list, int index){
 
 // Quiero retornar la informacion en un nodo, entonces deberia retornar un puntero al nodo, List.
 // Pero en el listADT.h no puedo definir un tipo de return como List
-//
 //  LO RESOLVI! TENIA QUE CREAR UN TYPEDEF EN EN ARCHIVO DE ENCABEZADO QUE FUNCIONE COMO List
 Listh getElementAtIndex(const listADT list, int index){
     return getElementAtIndexRec(list->first, index);
