@@ -4,7 +4,6 @@
 
 #define BLOCK 20
 // SOLUCION USANDO ARRAYS, IMPLEMENTAR CON LISTAS PARA PRACTICAR
-//
 struct setCDT{
     Array conjunto;
     size_t size;
