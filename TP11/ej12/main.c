@@ -6,7 +6,6 @@
 
 int main (void) {
 	socialADT soc = newSocial();
-	printf("LINEA");
 	char ** rel;
 	rel = persons(soc); // rel = {NULL}
 	assert( rel[0] == 0 );
@@ -24,6 +23,7 @@ int main (void) {
 	addRelated(soc, "juan", "pedro");
 	addRelated(soc, "juan", aux);
 	addRelated(soc, "juan", "juana");
+
 	char ** juanFriends = related(soc, "juan"); // juanFriends es {"ana", "juana", "pedro", NULL};
 	assert( !strcmp(juanFriends[0], "ana") && !strcmp(juanFriends[1], "juana"));
 	assert( !strcmp(juanFriends[2], "pedro") && juanFriends[3] == NULL );

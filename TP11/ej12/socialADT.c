@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <sys/_types/_size_t.h>
 #include <sys/wait.h>
 #include "socialADT.h"
 
@@ -13,7 +14,6 @@
 typedef struct allegados{
     struct allegados* tail;  // Siguiente nodo, siguiente allegado. Lo hago con listas porque necesito orden alfabetico
     char name[NAME_LENGTH];
-    size_t sizeAllegados;
 } tAllegados;
 
 typedef tAllegados* Allegados;
@@ -22,6 +22,7 @@ typedef struct persona{
     struct persona* tail;   // Siguiente nodo, siguiente persona. Lo hago con listas porque necesito orden alfabetico
     char name[NAME_LENGTH];
     Allegados allegados;
+    size_t sizeAllegados;
 } tPerson;
 
 typedef tPerson* Personas;   // Array de structs tPerson, donde cada elemento del array es un struct que tiene el nombre de la persona y un array de todos sus allegados.
@@ -31,8 +32,6 @@ typedef struct socialCDT{
     size_t size;    // Cantidad de personas
 } socialCDT;
 
-
-
 socialADT newSocial(void){
     socialADT newS = calloc(1, sizeof(*newS));
     return newS;
@@ -41,14 +40,14 @@ socialADT newSocial(void){
 static void freeAllegadosRec(Allegados allegado){
     if(allegado == NULL)
         return ;
-    free(allegado->tail);
+    freeAllegadosRec(allegado->tail);
     free(allegado);
 }
 static void freePeopleRec(Personas person){     // CHEQUEAR
     if(person == NULL)
         return ;
+    freePeopleRec(person->tail);
     freeAllegadosRec(person->allegados);
-    free(person->tail);
     free(person);
 }
 void freeSocial(socialADT soc){
@@ -58,107 +57,92 @@ void freeSocial(socialADT soc){
     free(soc);
 }
 
-
 static Personas getPersonByName(Personas p, const char* name){
-    if(p == NULL)
-        return NULL;
-    if(strcmp(p->name, name))
-        return p;
-    return getPersonByName(p->tail, name);
-}
-
-static int compareASCIIsRec(char* letterP, const char* letterN){    // Lo subraya porque no le puse const, es al pedo
-    if(letterP == NULL || letterN == NULL)
-        return 0;
-    if(*letterP > *letterN)
-        return 1;
-    if(*letterP < *letterN)
-        return -1;
-    return compareASCIIsRec(letterP+1, letterN+1);   // Si son iguales comparo con la siguiente letra
-}
-
-static Personas addPersonRec(Personas person, const char* name){
-    if(person == NULL){
+    int c;
+    if(p == NULL || (c = strcmp(p->name, name)) > 0){
         return NULL;
     }
-    if(compareASCIIsRec(person->name, name) > 0){    // Si la letra de persona->name es mayor que la letra de name, en este nodo va name
-        // Name va exactamente en este nodo
+    if(c < 0){
+        return getPersonByName(p->tail, name);
+    }
+    return p;
+}
+
+static Personas addPersonRec(Personas person, const char* name, size_t* size){
+    if(person == NULL || strcmp(person->name, name) >= 0){    // Si la letra de persona->name es mayor que la letra de name, en este nodo va name
         Personas newP = calloc(1, sizeof(*newP));
-        strcpy(newP->name, name);    // Guardo una copia, no el puntero.
+        strncpy(newP->name, name, NAME_LENGTH);    // Guardo una copia, no el puntero.
         newP->tail = person;
+        (*size)++;
         return newP;
     }
-    person->tail =  addPersonRec(person->tail, name);      // Si no entro al if -> el resultado dio -1 -> comparo con el nombre de la siguiente persona en la lista
+    person->tail =  addPersonRec(person->tail, name, size);      // Si no entro al if -> el resultado dio -1 -> comparo con el nombre de la siguiente persona en la lista
     return person;
 }
 
 void addPerson(socialADT soc, const char* name){
-    if(getPersonByName(soc->primerPersona, name) == NULL)
-        addPersonRec(soc->primerPersona, name);
+    if(getPersonByName(soc->primerPersona, name) == NULL){
+        soc->primerPersona = addPersonRec(soc->primerPersona, name, &soc->size);
+    }
 }
 
-static Allegados addRelatedRec(Allegados allegados, const char* related){
-    if(allegados == NULL){
-        return NULL;
-    }
-    if(compareASCIIsRec(allegados->name, related) > 0){    // Si la letra de allegados->name es mayor que la letra de related, en este nodo va related
+static Allegados addRelatedRec(Allegados allegados, const char* related, size_t* size){
+
+    if(allegados == NULL || strcmp(allegados->name, related) > 0){    // Si la letra de allegados->name es mayor que la letra de related, en este nodo va related
         // Related va exactamente en este nodo
         Allegados newA = calloc(1, sizeof(*newA));
-        strcpy(newA->name, related);    // Guardo una copia, no el puntero.
+        strncpy(newA->name, related, NAME_LENGTH);    // Guardo una copia, no el puntero.
         newA->tail = allegados;
-        allegados->sizeAllegados++;
+        (*size)++;
         return newA;
     }
-    allegados->tail = addRelatedRec(allegados->tail, related);      // Si no entro al if -> el resultado dio -1 -> comparo con el nombre del siguiente allegado en la lista
+    allegados->tail = addRelatedRec(allegados->tail, related, size);      // Si no entro al if -> el resultado dio -1 -> comparo con el nombre del siguiente allegado en la lista
     return allegados;
 }
 
 void addRelated(socialADT soc, const char* name, const char* related){
-    if(soc == NULL)
-        return ;
     Personas p = getPersonByName(soc->primerPersona, name);
     if(p == NULL)  // Si la persona no existe no hace nada
         return ;
-    addRelatedRec(p->allegados, related);
+    p->allegados = addRelatedRec(p->allegados, related, &p->sizeAllegados);
 }
 
-
-static char** relatedIt(Personas p, const char* name){
-    char** relatedVec = malloc((p->allegados->sizeAllegados + 1) * sizeof(*relatedVec));
-    int i;
-    for(i = 0; i < p->allegados->sizeAllegados; i++){
-        strcpy(relatedVec[i], p->allegados->name);
+static void relatedRec(Allegados a, char** relatedVec, size_t size){
+    if(size == 0){
+        *relatedVec = NULL;
+        return ;
     }
-    relatedVec[i] = NULL;
-    return relatedVec;
+    *relatedVec = malloc((NAME_LENGTH + 1) * sizeof(**relatedVec));
+    strcpy(*relatedVec, a->name);
+    relatedRec(a->tail, relatedVec + 1, size-1);
 }
 
 char** related(const socialADT soc, const char* person){
-    if(soc == NULL){
-        return calloc(1, sizeof(void *));    // Retorna array con NULL como unico elemento
-    }
     Personas p = getPersonByName(soc->primerPersona, person);
-    return relatedIt(p, person);
+    if(p == NULL){
+        return calloc(1, sizeof(char*));
+    }
+    char** relatedVec = malloc((p->sizeAllegados + 1) * sizeof(*relatedVec));
+    relatedRec(p->allegados, relatedVec, p->sizeAllegados);
+    return relatedVec;
 }
 
-
-
-static char** personsIT(Personas p, size_t size){
-    if(p == NULL){
-        return calloc(1, sizeof(void *));  // Debe retornar un array con NULL como unico elemento
+static void personsRec(Personas p, size_t size, char** personsVec){
+    if(size == 0){
+        *personsVec = NULL;  // El ultimo elemento es NULL
+        return ;
     }
-    char** personsVec = malloc((size + 1) * sizeof(*personsVec));
-    int i;
-    for(i = 0; i < size; i++){
-        strcpy(personsVec[i], p->name);
-    }
-    personsVec[i] = NULL;
-    return personsVec;
+    *personsVec = malloc((NAME_LENGTH + 1) * sizeof(**personsVec));
+    strcpy(*personsVec, p->name);
+    personsRec(p->tail, size - 1, personsVec+1);
+    return ;
 }
 
 char** persons(const socialADT soc){
-    if(soc == NULL){
-        return NULL;
+    if(soc->primerPersona == NULL){
+        return calloc(1, sizeof(void *));  // Debe retornar un array con NULL como unico elemento
     }
-    return personsIT(soc->primerPersona, soc->size);
+    char** personsVec = malloc((soc->size + 1) * sizeof(*personsVec));
+    personsRec(soc->primerPersona, soc->size, personsVec);
+    return personsVec;
 }
