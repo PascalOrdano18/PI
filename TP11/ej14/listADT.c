@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include "listADT.h"
 
-// ES INCREIBLE LO FACIL QUE ME SALIO ESTE EJERCICIO, ENTENDI BIEN LOS ITERADORES
-
 typedef struct node{
     struct node* tail;
     elemType head;
@@ -12,9 +10,11 @@ typedef struct node{
 typedef tNode* List;
 
 struct listCDT{
-    List first;
-    List iter;     // Es un puntero a un nodo que va a ser manipulado con las 3 funciones, permitiendo acceder al ultimo nodo insertado
-    List iterAsc;  // Es un puntero a un nodo que va a ser manipulado con 3 funciones que permiten acceder a los elementos de manera ascendente
+    List firstAsc;
+    List firstInsert;    // Solo lo voy a usar en toBegin
+    List lastInsert;
+    List iterInsert;
+    List iterAsc;
     compF cmp;
 };
 
@@ -24,69 +24,71 @@ listADT newList(compF cmp){
     return newL;
 }
 
-static List addRec(List node, elemType elem, compF cmp, listADT l){
+static List addRec(List node, elemType elem, compF cmp, int* added){
     int c;
-    if(node == NULL || (c = cmp(node->head, elem)) == 0){
-        return node;
+    if(node == NULL || (c = cmp(elem, node->head)) < 0){
+        List aux = malloc(sizeof(*node));
+        aux->head = elem;
+        aux->tail = node;
+        *added = 1;
+        return aux;
     }
-    if(c > 0){
-        List newNode = malloc(sizeof(*newNode));
-        newNode->head = elem;
-        newNode->tail = node;
-        if(l->iter != NULL){
-            l->iter->head = elem;
-            l->iter = newNode;
-        }
-        if(l->iterAsc != NULL){
-            l->iterAsc->head = elem;
-            l->iterAsc = newNode;
-        }
-        return newNode;
+    if(c > 0 ){
+        node->tail = addRec(node->tail, elem, cmp, added);
     }
-    node->tail = addRec(node->tail, elem, cmp, l);
     return node;
 }
 
 void add(listADT list, elemType elem){
-    list->first = addRec(list->first, elem, list->cmp, list);
+    int added = 0;
+    list->firstAsc = addRec(list->firstAsc, elem, list->cmp, &added);
+    if(added){
+        List aux = malloc(sizeof(*aux));
+        aux->head = elem;
+        aux->tail = NULL;
+        if(list->firstInsert == NULL){
+            list->firstInsert = aux;
+        }
+        else{
+            list->lastInsert->tail = aux;
+        }
+        list->lastInsert = aux;
+    }
 }
 
 void toBegin(listADT list){
-    list->iter = list->first;
+    list->iterInsert = list->firstInsert;
 }
 
 int hasNext(listADT list){
-    if(list->iter == NULL || list->iter->tail == NULL)
-        return 0;
-    return 1;
+    return list->iterInsert != NULL;
 }
 
 elemType next(listADT list){
     if(hasNext(list) == 0){
+        puts("Uso invalido de Next");
         exit(1);
     }
-    list->iter = list->iter->tail;
-    return list->iter->head;
+    elemType res = list->iterInsert->head;
+    list->iterInsert = list->iterInsert->tail;
+    return res;
 }
 
-
 void toBeginAsc(listADT list){
-    list->iterAsc = list->first;
+    list->iterAsc = list->firstAsc;
 }
 
 int hasNextAsc(listADT list){
-    if(list->iterAsc == NULL || list->iterAsc->tail == NULL){
-        return 0;
-    }
-    return 1;
+    return list->iterAsc != NULL;
 }
 
 elemType nextAsc(listADT list){
     if(list->iterAsc == NULL || hasNextAsc(list) == 0){
         exit(1);
     }
+    elemType res = list->iterAsc->head;
     list->iterAsc = list->iterAsc->tail;
-    return list->iterAsc->head;
+    return res;
 }
 
 
@@ -99,6 +101,7 @@ static void freeRec(List node){
 }
 
 void freeList(listADT list){
-    freeRec(list->first);
+    freeRec(list->firstInsert);
+    freeRec(list->firstAsc);
     free(list);
 }

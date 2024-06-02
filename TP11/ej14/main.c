@@ -14,13 +14,11 @@ main(void) {
    assert(!hasNext(c));
    assert(!hasNextAsc(c));
    add(c, 3);   add(c, 1);   add(c, 5);   add(c, 2);
-   puts("OK");
    toBegin(c);         // iterador por orden de insercion
    int n = next(c);    // n = 3
    assert(n==3);
    n = next(c);        // n = 1
    assert(n==1);
-
    toBeginAsc(c);      // iterador por orden ascendente
 
    assert(hasNext(c));
