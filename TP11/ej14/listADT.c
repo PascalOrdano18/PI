@@ -91,7 +91,6 @@ elemType nextAsc(listADT list){
     return res;
 }
 
-
 static void freeRec(List node){
     if(node == NULL){
         return ;
