@@ -49,9 +49,6 @@ static boolColList getColRec(boolColList l, size_t col){
 
 
 
-
-
-
 boolean getValue(const boolMatrixADT m, size_t row, size_t col){
 
 }
