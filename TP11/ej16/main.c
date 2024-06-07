@@ -29,7 +29,6 @@ int main(void) {
 
     aux = concatAll(p);
     assert(strcmp(aux, "Hello, world")==0);
-    puts("OK");
     free(aux);
 
     aux = concat(p,1230, 1800);

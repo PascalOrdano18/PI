@@ -6,7 +6,7 @@
 
 
 #define BLOCK 50
-#define INDEX(key, keyTo) ((keyTo) - (key))
+#define INDEX(key, keyFrom) ((key) - (keyFrom))
 
 
 typedef struct elem{
@@ -39,7 +39,7 @@ phrasesADT newPhrasesADT(size_t keyFrom, size_t keyTo){
 int put(phrasesADT ph, size_t key, const char *phrase){
     if(key > ph->keyTo || key < ph->keyFrom)
         return 0;
-    size_t index = INDEX(key, ph->keyTo);
+    size_t index = INDEX(key, ph->keyFrom);
 
     if(ph->arrayElems[index].size == 0){
         ph->size++;
@@ -66,7 +66,7 @@ size_t size(const phrasesADT ph){
 
 
 char* get(const phrasesADT ph, size_t key){
-    size_t index = INDEX(key, ph->keyTo);
+    size_t index = INDEX(key, ph->keyFrom);
     if(key < ph->keyFrom || key > ph->keyTo || ph->arrayElems[index].size == 0){
         return NULL;
     }
@@ -86,30 +86,23 @@ char* concatAll(const phrasesADT ph){
 char* concat(const phrasesADT ph, size_t from, size_t to){
     if(from > to || ph->keyFrom > from || ph->keyTo < to)
         return NULL;
-    char* string = NULL;
+    char* string = calloc(1, 1);
 
     int space = 0;
-    int flag = 0;
-    for(int i = INDEX(from, ph->keyFrom); i < INDEX(to, ph->keyFrom); i++){   // itero sobre el array de structs
+    for(int i = INDEX(from, ph->keyFrom); i <= INDEX(to, ph->keyFrom); i++){   // itero sobre el array de structs
         if(ph->arrayElems[i].size != 0){
-            flag = 1;
             space += ph->arrayElems[i].size;
             string = realloc(string, space + 1);
             strcat(string, ph->arrayElems[i].phrase);
         }
     }
-    if(!flag){
-        return NULL;
-    }
     return string;
 }
 
 void freePhrases(phrasesADT ph){
-    for(int i = 0; i < ph->keyTo; i++){
-        for(int j = 0; ph->arrayElems[i].phrase[j] != 0; j++){
-            free(ph->arrayElems[i].phrase);
-        }
-        free(ph->arrayElems++);
+    for(int i = 0; i <= INDEX(ph->keyTo, ph->keyFrom); i++){
+        free(ph->arrayElems[i].phrase);
     }
+    free(ph->arrayElems);
     free(ph);
 }
