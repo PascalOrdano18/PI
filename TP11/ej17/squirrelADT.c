@@ -38,7 +38,7 @@ size_t countSquirrel(squirrelCensusADT squirrelAdt, size_t yDistance, size_t xDi
     if(row > squirrelAdt->rowsSize){
         squirrelAdt->rows = realloc(squirrelAdt->rows, row * sizeof(rows));
         for(int i = squirrelAdt->rowsSize; i < row; i++){
-            squirrelAdt->rows[i] = 0;
+            squirrelAdt->rows[i].squirrelsInCol = 0;
             squirrelAdt->rowsSize = row;
         }
         squirrelAdt->rowsSize = row;
