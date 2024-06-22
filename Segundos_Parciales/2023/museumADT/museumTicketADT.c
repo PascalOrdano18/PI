@@ -30,7 +30,6 @@ museumTicketADT newMuseumTicket(void){
     return new;
 }
 
-
 // Agrega al visitor si no estaba registrado antes. Si estaba registrado no hace nada y cambia el flag
 static TVisitor addVisitor(TVisitor visitor, const char* targetVisitor, int* exists){
     int c;
