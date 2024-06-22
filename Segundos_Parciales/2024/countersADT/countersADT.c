@@ -88,8 +88,11 @@ struct checkInResult * checkInCounters(countersADT counters, size_t * checkInRes
             (*checkInResultDim)++;
         }
     }
-
-    res = realloc(res, *checkInResultDim * sizeof(struct checkInResult));
+    if(*checkInResultDim > 0){
+        res = realloc(res, *checkInResultDim * sizeof(struct checkInResult));
+    } else {
+        res = NULL;      // Ni idea, sin esto no funciona sin las flags. Con flags anda barbaro sin esto, raro
+    }
     return res;
 }
 
