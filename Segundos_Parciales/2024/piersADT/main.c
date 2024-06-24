@@ -31,5 +31,6 @@ int main(void) {
     assert(shipInDock(piersAdt, 5, 7) == 0);
     assert(pierShips(piersAdt, 5) == 1);
     freePiers(piersAdt);
+    puts("OK!");
     return 0;
 }

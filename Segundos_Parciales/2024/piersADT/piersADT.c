@@ -1,23 +1,21 @@
 #include "piersADT.h"
-#include <alloca.h>
-#include <stddef.h>
 #include <stdlib.h>
-#include <sys/_types/_size_t.h>
 
-typedef struct ports{
-    char* dockArray;   // Aqui cada posicion representara un barco un el dock
-    char* dockExistanceArray;   // Aqui cada posicion representara si existe el dock o no
-    size_t allocDocksAmount;
-    size_t docksAmount;
-    size_t shipsAmount;
-} ports;
+
+typedef struct puertos{
+    char** arrMuelles;  // existe si no es NULL
+    size_t docksSize;
+    size_t docksAlloc;
+    char exists;  // 1 si existe 0 si no
+    size_t shipsInPier;  // cantidad de embarcaciones en todos los muelles del puerto
+} puertos;
 
 struct piersCDT{
-    ports* portArray;
-    char* portExistanceArray;
-    size_t allocPortsAmount;
-    size_t portsAmount;
+    puertos* arrPuertos;
+    size_t piersSize;
+    size_t piersAlloc;
 };
+
 
 piersADT newPiers(void){
     piersADT new = calloc(1, sizeof(struct piersCDT));
@@ -25,81 +23,81 @@ piersADT newPiers(void){
 }
 
 size_t addPier(piersADT piers, size_t pierNumber){
-    if(piers->allocPortsAmount >= pierNumber && piers->portExistanceArray[pierNumber] == 1){
+    if(piers->piersAlloc <= pierNumber){
+        piers->arrPuertos = realloc(piers->arrPuertos, (pierNumber + 1) * sizeof(puertos));    // DEBE SER PIERNUMBER + 1
+        for(int i = piers->piersAlloc; i < pierNumber + 1; i++){
+            piers->arrPuertos[i].shipsInPier = 0;
+            piers->arrPuertos[i].docksSize = 0;
+            piers->arrPuertos[i].exists = 0;
+            piers->arrPuertos[i].docksAlloc = 0 ;
+            piers->arrPuertos[i].arrMuelles = NULL;
+        }
+        piers->piersAlloc = pierNumber + 1;   // Pues quieo poder acceder a pierNumber
+    }
+
+    if(piers->arrPuertos[pierNumber].exists == 1){     // - 1 pues se empieza a contar de 0.
         return 0;
     }
-    if(pierNumber > piers->allocPortsAmount){
-        piers->portExistanceArray = realloc(piers->portExistanceArray, pierNumber + 1);
-        piers->portArray = realloc(piers->portArray, (pierNumber + 1) * sizeof(*piers->portArray));
-        for(int i = piers->allocPortsAmount; i < pierNumber; i++){
-            piers->portExistanceArray[i] = 0;
-        }
-        piers->allocPortsAmount = pierNumber;
-    }
-    piers->portExistanceArray[pierNumber] = 1;
-    piers->portsAmount++;
+    piers->arrPuertos[pierNumber].exists = 1;
+    piers->piersSize++;
     return 1;
 }
 
 
 size_t addPierDock(piersADT piers, size_t pierNumber, size_t dockNumber){
-    if(piers->allocPortsAmount <= pierNumber || piers->portExistanceArray[pierNumber] == 0 || (piers->portArray[pierNumber].allocDocksAmount >= dockNumber && piers->portArray[pierNumber].dockExistanceArray[dockNumber] == 1)){
+    if(piers->piersAlloc <= pierNumber || piers->arrPuertos[pierNumber].exists == 0){
         return 0;
     }
-    if(piers->portArray[pierNumber].allocDocksAmount < dockNumber){
-        piers->portArray[pierNumber].dockExistanceArray = realloc(piers->portArray[pierNumber].dockExistanceArray, (dockNumber + 1) * sizeof(*piers->portArray[pierNumber].dockExistanceArray));
-        piers->portArray[pierNumber].dockArray = realloc(piers->portArray[pierNumber].dockArray, (dockNumber + 1) * sizeof(*piers->portArray[pierNumber].dockArray));
-        for(int i = piers->portArray[pierNumber].allocDocksAmount; i < dockNumber; i++){
-            piers->portArray[pierNumber].dockExistanceArray[i] = 0;
+    if(piers->arrPuertos[pierNumber].docksAlloc <= dockNumber){
+        piers->arrPuertos[pierNumber].arrMuelles = realloc(piers->arrPuertos[pierNumber].arrMuelles, (dockNumber + 1) * sizeof(*piers->arrPuertos[pierNumber].arrMuelles));
+        for(int i = piers->arrPuertos[pierNumber].docksAlloc; i < dockNumber + 1; i++){
+            piers->arrPuertos[pierNumber].arrMuelles[i] = NULL;
         }
-        piers->portArray[pierNumber].allocDocksAmount = dockNumber;
+        piers->arrPuertos[pierNumber].docksAlloc = dockNumber + 1;
     }
-    piers->portArray[pierNumber].dockExistanceArray[dockNumber] = 1;
-    piers->portArray[pierNumber].docksAmount++;
+    if(piers->arrPuertos[pierNumber].arrMuelles[dockNumber] != NULL){
+        return 0;
+    }
+    piers->arrPuertos[pierNumber].arrMuelles[dockNumber] = calloc(1, sizeof(*piers->arrPuertos[pierNumber].arrMuelles[dockNumber]));  // arranca sin embarcaciones;
     return 1;
 }
 
 size_t dockShip(piersADT piers, size_t pierNumber, size_t dockNumber){
-    if(piers->allocPortsAmount <= pierNumber || piers->portExistanceArray[pierNumber] == 0 || piers->portArray[pierNumber].allocDocksAmount < dockNumber || piers->portArray[pierNumber].dockExistanceArray[dockNumber] == 0 || piers->portArray[pierNumber].dockArray[dockNumber] == 1){
+    if(piers->piersAlloc <= pierNumber || piers->arrPuertos[pierNumber].exists == 0 || piers->arrPuertos[pierNumber].arrMuelles == NULL){
         return 0;
     }
-    piers->portArray[pierNumber].dockArray[dockNumber] = 1;
-    piers->portArray[pierNumber].shipsAmount++;
+    *piers->arrPuertos[pierNumber].arrMuelles[dockNumber] = 1;
+    piers->arrPuertos[pierNumber].shipsInPier++;
     return 1;
 }
 
 int shipInDock(const piersADT piers, size_t pierNumber, size_t dockNumber){
-    if(piers->allocPortsAmount <= pierNumber || piers->portExistanceArray[pierNumber] == 0 || piers->portArray[pierNumber].allocDocksAmount < dockNumber || piers->portArray[pierNumber].dockExistanceArray[dockNumber] == 0){
+    if(piers->piersAlloc <= pierNumber || piers->arrPuertos[pierNumber].exists == 0 || piers->arrPuertos[pierNumber].arrMuelles == NULL){
         return -1;
     }
-    return piers->portArray[pierNumber].dockArray[dockNumber];
+    return *piers->arrPuertos[pierNumber].arrMuelles[dockNumber];
 }
 
-
 size_t pierShips(const piersADT piers, size_t pierNumber){
-    if(pierNumber >= piers->allocPortsAmount || piers->portExistanceArray[pierNumber] == 0){
+    if(piers->piersAlloc <= pierNumber || piers->arrPuertos[pierNumber].exists == 0){
         return -1;
     }
-    return piers->portArray[pierNumber].shipsAmount;
+    return piers->arrPuertos[pierNumber].shipsInPier;
 }
 
 size_t undockShip(piersADT piers, size_t pierNumber, size_t dockNumber){
-    if(pierNumber >= piers->allocPortsAmount || piers->portExistanceArray[pierNumber] == 0 || dockNumber > piers->portArray[pierNumber].allocDocksAmount || piers->portArray[pierNumber].dockExistanceArray[dockNumber] == 0 || piers->portArray[pierNumber].dockArray[dockNumber] == 0){
-        return 0;
+    if(piers->piersAlloc <= pierNumber || piers->arrPuertos[pierNumber].exists == 0 || piers->arrPuertos[pierNumber].arrMuelles == NULL || *piers->arrPuertos[pierNumber].arrMuelles[dockNumber] == 0){
+        exit(1);
     }
-    piers->portArray[pierNumber].dockArray[dockNumber] = 0;
-    piers->portArray[pierNumber].shipsAmount--;
+    *piers->arrPuertos[pierNumber].arrMuelles[dockNumber] = 0;
+    piers->arrPuertos[pierNumber].shipsInPier--;
     return 1;
 }
 
 void freePiers(piersADT piers){
-    for(int i = 0; i < piers->allocPortsAmount; i ++){
-        if(piers->portExistanceArray[i] == 1){
-            free(piers->portArray[i].dockArray);
-            free(piers->portArray[i].dockExistanceArray);
-        }
+    for(int i = 0; i < piers->piersAlloc; i++){
+        free(piers->arrPuertos[i].arrMuelles);
     }
-    free(piers->portArray);
-    free(piers->portExistanceArray);
+    free(piers->arrPuertos);
     free(piers);
 }
