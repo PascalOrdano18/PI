@@ -22,7 +22,6 @@ struct jokesCDT{
     size_t dim;
 };
 
-
 jokesADT newJokes(void){
     jokesADT new = calloc(1, sizeof(struct jokesCDT));
     return new;
@@ -45,13 +44,11 @@ static TCategory addCategoryRec(TCategory node, const char *category, char* adde
     return node;
 }
 
-
 void addCategory(jokesADT jokes, const char *category){
     char added = 0;
     jokes->first = addCategoryRec(jokes->first, category, &added);
     jokes->dim += added;
 }
-
 
 static TCategory findCategory(TCategory node, const char* category){
     int c;
@@ -61,7 +58,6 @@ static TCategory findCategory(TCategory node, const char* category){
         return node;
     return findCategory(node->tail, category);
 }
-
 
 void addJoke(jokesADT jokes, const char *category, const char *joke){
     TCategory cat = findCategory(jokes->first, category);
@@ -92,9 +88,8 @@ void addJoke(jokesADT jokes, const char *category, const char *joke){
 
 char * joke(jokesADT jokes, const char * category){
     TCategory cat = findCategory(jokes->first, category);
-    if(cat == NULL || cat->jokesAmount == 0){
+    if(cat == NULL || cat->jokesAmount == 0)
         return NULL;
-    }
     char* res = malloc(cat->jokes[0].stringSize + 1);
     strcpy(res, cat->jokes[0].jokeString);
     return res;
@@ -140,7 +135,6 @@ char ** categories(const jokesADT jokes){
     }
     return res;
 }
-
 
 static void freeJokesRec(TCategory node){
     if(node == NULL){
